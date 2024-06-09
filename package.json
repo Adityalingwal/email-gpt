@@ -1,0 +1,32 @@
+{
+  "name": "e-classifygpt",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.12.0",
+    "@next/font": "^14.2.3",
+    "@nextui-org/spinner": "^2.0.29",
+    "@nextui-org/tooltip": "^2.0.35",
+    "framer-motion": "^11.2.10",
+    "googleapis": "^139.0.0",
+    "next": "14.2.3",
+    "next-auth": "^4.24.7",
+    "openai": "^4.48.2",
+    "react": "^18.3.1",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
