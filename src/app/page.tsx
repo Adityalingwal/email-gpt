@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export default function Home() {
   const { data: session } = useSession();
-  const [userKey, setUserKey] = useState<string | "">("")
+  const [userKey, setUserKey] = useState<string | "">("");
   const router = useRouter();
 
   const handleSubmit = (e: any) => {
@@ -14,77 +14,63 @@ export default function Home() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('GEMINI_KEY', userKey);
     }
-    alert('API Key saved!');
+    alert('Your Gemini API key has been saved successfully');
   };
 
-  const divs = Array.from({ length: 72 }, (_, i) => (
-    <div
-      key={i}
-      className={`h-[15vh] ${i % 12 < 9 ? "col-span-1" : "col-span-3"
-        } border-2 border-slate-100 -z-1`}
-    >
-      {" "}
-    </div>
-  ));
-
   return (
-    <div className="overflow-hidden h-screen">
-      <div className="grid grid-cols-12  w-full h-full">
-        {divs}
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="flex flex-col items-center justify-center  bg-slate-100 w-[70vh] rounded p-5  ">
-            <div className="font-spaceMono text-6xl font-bold text-transparent bg-gradient-to-r from-slate-500 to-slate-800 bg-clip-text">
-              ClassifyGPT
-            </div>
-            <div className="flex">
-              <div className="font-spaceMono text-l font-semibold text-transparent bg-gradient-to-r from-slate-500 to-slate-800 bg-clip-text">
-                powered by GPT-4o
+    <div className="relative h-screen w-screen bg-black flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center z-10">
+        <div className="flex flex-col items-center justify-center bg-black bg-opacity-90 w-[70vh] rounded p-5 shadow-xl">
+          <div className="font-spaceMono text-6xl font-bold text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text mb-8">
+            EmailGPT
+          </div>
+          {session ? (
+            <div className="flex flex-col justify-center items-center mt-5">
+              <div className="font-semibold text-white text-2xl">
+                Welcome, {session?.user?.name}
               </div>
-              <div>🚀</div>
-            </div>
-            {session ? (
-              <div className="flex flex-col justify-center items-center mt-5">
-                <div className="font-semibold">
-                  Welcome, {session?.user?.name}
-                </div>
-                <div className="flex gap-2 mt-2">
-                <input type="text" placeholder="Enter Your OpenAi API Key"
+              <div className="flex gap-2 mt-4">
+                <input
+                  type="text"
+                  placeholder="Enter Your Gemini API Key"
                   onChange={(e) => setUserKey(e.target.value)}
-                  className="w-[30vh] h-[5vh] border-slate-300 border-2 rounded text-center" />
-                <button className="w-[5vh] h-[5vh] bg-slate-200 rounded" onClick={handleSubmit}>➕</button>
-                </div>
-                <div className="mt-6 flex justify-center items-center gap-4 ">
-                  <button
-                    className="bg-gradient-to-r from-slate-500 to-slate-800 text-white h-[5vh] w-[20vh] rounded hover:border-black hover:scale-105 transition ease-in-out"
-                    onClick={() => router.push("/home")}
-                  >
-                    Go to home
-                  </button>
-                  <button
-                    className="bg-gradient-to-r from-slate-500 to-slate-800 text-white h-[5vh] w-[20vh] rounded hover:border-black hover:scale-105 transition ease-in-out"
-                    onClick={() => signOut()}
-                  >
-                    Log Out
-                  </button>
-                </div>
-                <div className="absolute flex flex-wrap p-4 bg-white bottom-40 font-semibold font-spaceMono text-center text-l z-10">
-                  🟢 If you  dont have OpenAi api key you are free to use mine for now you will only be able to leverage gpt-3.5-turbo with my key. Have fun 💖
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col justify-center items-center mt-5">
-                <div className="font-semibold">
-                  Welcome, please login with your google account
-                </div>
+                  className="w-[50vh] h-[5vh] border-gray-700 border-2 rounded text-center bg-gray-800 text-white"
+                />
                 <button
-                  className="bg-gradient-to-r from-slate-500 to-slate-800 text-white mt-2 h-[5vh] w-[20vh] rounded"
-                  onClick={() => signIn("google")}
+                  className="w-[8vh] h-[5vh] bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white rounded"
+                  onClick={handleSubmit}
                 >
-                  Login
+                  Submit
                 </button>
               </div>
-            )}
-          </div>
+              <div className="mt-6 flex justify-center items-center gap-4">
+                <button
+                  className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white h-[5vh] w-[20vh] rounded hover:scale-105 transition ease-in-out"
+                  onClick={() => router.push("/home")}
+                >
+                  Go to home
+                </button>
+                <button
+                  className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white h-[5vh] w-[20vh] rounded hover:scale-105 transition ease-in-out"
+                  onClick={() => signOut()}
+                >
+                  Log Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col justify-center items-center mt-5">
+              <div className="font-semibold text-white text-2xl">
+                Welcome, please login with your Google account
+              </div>
+              <button
+                className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white mt-4 h-[5vh] w-[20vh] rounded hover:scale-105 transition ease-in-out"
+                onClick={() => signIn("google")}
+              >
+                Login
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

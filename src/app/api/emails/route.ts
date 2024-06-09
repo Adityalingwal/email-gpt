@@ -1,22 +1,18 @@
 import { google } from 'googleapis';
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { NEXT_AUTH } from '@/app/config/auth';
-import { formatEmail, separateHTMLandText } from './emailFormater';
+import { formatEmail } from './emailFormater';
 
-
-function getBody(payload : any) {
+function getPlainTextBody(payload) {
   let body = '';
 
   if (payload.parts) {
     payload.parts.forEach((part) => {
       if (part.mimeType === 'text/plain' && part.body && part.body.data) {
         body += Buffer.from(part.body.data, 'base64').toString('utf-8');
-      } else if (part.mimeType === 'text/html' && part.body && part.body.data) {
-        body += Buffer.from(part.body.data, 'base64').toString('utf-8');
       } else if (part.parts) {
-        body += getBody(part); // recursively handle nested parts
+        body += getPlainTextBody(part); 
       }
     });
   } else if (payload.body && payload.body.data) {
@@ -41,11 +37,10 @@ export async function GET(req: NextRequest) {
   const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
   try {
-
     const response = await gmail.users.messages.list({
       userId: 'me',
       q: 'from:(amazon.com)',
-      maxResults: 5,
+      maxResults: 10,
     });
 
     const messages = response.data.messages || [];
@@ -57,11 +52,11 @@ export async function GET(req: NextRequest) {
           id: message.id,
         });
         const headers = msg.data.payload.headers;
-        const subjectHeader = headers.find(header => header.name === 'Subject');
-        const fromHeader = headers.find(header => header.name === 'From');
+        const subjectHeader = headers.find((header) => header.name === 'Subject');
+        const fromHeader = headers.find((header) => header.name === 'From');
         const subject = subjectHeader ? subjectHeader.value : 'No Subject';
         let from = 'Unknown Sender';
-  
+
         // Extract sender's email from the "From" header
         if (fromHeader) {
           const match = fromHeader.value.match(/<(.+?)>/);
@@ -70,15 +65,12 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        const body = getBody(msg.data.payload);
-        const {text , html} = separateHTMLandText(body);
-        const formatedText = formatEmail(text);
+        const body = getPlainTextBody(msg.data.payload);
+        const formattedText = formatEmail(body);
 
-  
-        return { id: message.id, subject, from , body: {text: formatedText , html } };
+        return { id: message.id, subject, from, body: { text: formattedText, html: '' } };
       })
     );
-  
 
     return NextResponse.json({ emailDetails }, { status: 200 });
   } catch (error) {

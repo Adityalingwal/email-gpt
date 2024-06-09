@@ -1,9 +1,9 @@
 "use client"
 import { useEffect, useState } from 'react';
-import { useSession, signIn, signOut } from 'next-auth/react';
-import  classifyEmails  from '@/utils/gpt-classifier';
+import { useSession, signIn} from 'next-auth/react';
+import  classifyEmails  from '@/utils/gemini';
 import { CATEGORIZED_EMAILS, EMAIL } from '../type';
-import { UserCard } from '../components/userCard';
+import { Profile } from '../components/profile';
 import { EmailContainer } from '../components/emailContainer';
 
 export default function Home() {
@@ -45,7 +45,7 @@ export default function Home() {
   if (!session) {
     return (
       <div className=' h-screen flex justify-center mt-10 p-10'>
-        <div className="border-2 bg-rose-500 h-[30vh] w-[70vh] flex flex-col justify-center items-center gap-4 rounded">
+        <div className="border-2 bg-black h-[30vh] w-[70vh] flex flex-col justify-center items-center gap-4 rounded">
           <div className='font-spaceMono text-white'>
             please login using your google account
           </div>
@@ -59,16 +59,16 @@ export default function Home() {
 
   return (
     <div className=' h-screen flex flex-col items-center m-3 bg-white gap-5'>
-        <UserCard session={session}/>
+        <Profile session={session}/>
       <div className='flex justify-between w-[100vh]'>
         <div className='flex items-center gap-2'>
-          <h4 className='font-semibold'>Filter :</h4>
+          <h4 className='font-semibold'>Number of Emails :</h4>
           <input
             className=' text-center bg-black rounded text-white w-[10vh] border-2 border-slate-300'
             type='number'
             placeholder='filter'
             step="1"
-            max="50"
+            max="10"
             min="1"
             value={filterValue}
             onChange={(e) => {
@@ -80,7 +80,7 @@ export default function Home() {
         </div>
         <div>
           <button
-            className="bg-gradient-to-r from-slate-500 to-slate-800 text-white font-semibold mt-2 h-[5vh] w-[15vh] rounded hover:border-black hover:scale-105 transition ease-in-out"
+            className="bg-gradient-to-r bg-black text-white font-semibold mt-2 h-[5vh] w-[15vh] rounded hover:border-black hover:scale-105 transition ease-in-out"
             onClick={() => handleClassification(filteredEmails)}
           >
             Classify
