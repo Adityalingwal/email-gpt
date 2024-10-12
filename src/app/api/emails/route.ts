@@ -12,7 +12,7 @@ function getPlainTextBody(payload) {
       if (part.mimeType === 'text/plain' && part.body && part.body.data) {
         body += Buffer.from(part.body.data, 'base64').toString('utf-8');
       } else if (part.parts) {
-        body += getPlainTextBody(part); 
+        body += getPlainTextBody(part);
       }
     });
   } else if (payload.body && payload.body.data) {
@@ -39,7 +39,8 @@ export async function GET(req: NextRequest) {
   try {
     const response = await gmail.users.messages.list({
       userId: 'me',
-      maxResults: 10, // You can adjust the number of emails to fetch here
+      maxResults: 10, // Adjust the number of emails to fetch here
+      q: 'category:primary', // Filter to only show emails from the Primary category
     });
 
     const messages = response.data.messages || [];
