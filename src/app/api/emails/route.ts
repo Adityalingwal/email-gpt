@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
   const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
   try {
+    // Fetch the list of emails
     const response = await gmail.users.messages.list({
       userId: 'me',
       maxResults: 10, // Adjust the number of emails to fetch here
@@ -45,8 +46,12 @@ export async function GET(req: NextRequest) {
 
     const messages = response.data.messages || [];
 
-    const emailDetails = await Promise.all(
+    // Group emails by threadId
+    const threadsMap = {};
+
+    await Promise.all(
       messages.map(async (message) => {
+        // Get the details of each message
         const msg = await gmail.users.messages.get({
           userId: 'me',
           id: message.id,
@@ -66,12 +71,31 @@ export async function GET(req: NextRequest) {
 
         const body = getPlainTextBody(msg.data.payload);
         const formattedText = formatEmail(body);
+        
+        const threadId = msg.data.threadId;
 
-        return { id: message.id, subject, from, body: { text: formattedText, html: '' } };
+        // If the thread does not exist in the map, initialize it
+        if (!threadsMap[threadId]) {
+          threadsMap[threadId] = [];
+        }
+
+        // Add the message to the corresponding thread
+        threadsMap[threadId].push({
+          id: message.id,
+          subject,
+          from,
+          body: { text: formattedText, html: '' },
+        });
       })
     );
 
-    return NextResponse.json({ emailDetails }, { status: 200 });
+    // Convert the threads map to an array of threaded conversations
+    const threadedConversations = Object.keys(threadsMap).map((threadId) => ({
+      threadId,
+      messages: threadsMap[threadId],
+    }));
+
+    return NextResponse.json({ threadedConversations }, { status: 200 });
   } catch (error) {
     console.error('Error fetching emails', error);
     return NextResponse.json({ error: 'Failed to fetch emails' }, { status: 500 });
