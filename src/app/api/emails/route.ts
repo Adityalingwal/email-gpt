@@ -39,8 +39,7 @@ export async function GET(req: NextRequest) {
   try {
     const response = await gmail.users.messages.list({
       userId: 'me',
-      q: 'from:(amazon.com)',
-      maxResults: 10,
+      maxResults: 10, // You can adjust the number of emails to fetch here
     });
 
     const messages = response.data.messages || [];
@@ -57,7 +56,6 @@ export async function GET(req: NextRequest) {
         const subject = subjectHeader ? subjectHeader.value : 'No Subject';
         let from = 'Unknown Sender';
 
-        // Extract sender's email from the "From" header
         if (fromHeader) {
           const match = fromHeader.value.match(/<(.+?)>/);
           if (match) {
