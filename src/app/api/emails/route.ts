@@ -45,35 +45,47 @@ export async function GET(req: NextRequest) {
 
     const messages = response.data.messages || [];
 
-    const emailDetails = await Promise.all(
+    // Fetch threads based on the threadId
+    const emailThreads = await Promise.all(
       messages.map(async (message) => {
-        const msg = await gmail.users.messages.get({
+        const threadResponse = await gmail.users.threads.get({
           userId: 'me',
-          id: message.id,
+          id: message.threadId,
         });
-        const headers = msg.data.payload.headers;
-        const subjectHeader = headers.find((header) => header.name === 'Subject');
-        const fromHeader = headers.find((header) => header.name === 'From');
-        const subject = subjectHeader ? subjectHeader.value : 'No Subject';
-        let from = 'Unknown Sender';
 
-        if (fromHeader) {
-          const match = fromHeader.value.match(/<(.+?)>/);
-          if (match) {
-            from = match[1];
+        const threadMessages = threadResponse.data.messages || [];
+
+        // Extract relevant details from each message in the thread
+        const formattedMessages = threadMessages.map((msg) => {
+          const headers = msg.payload.headers;
+          const subjectHeader = headers.find((header) => header.name === 'Subject');
+          const fromHeader = headers.find((header) => header.name === 'From');
+          const subject = subjectHeader ? subjectHeader.value : 'No Subject';
+          let from = 'Unknown Sender';
+
+          if (fromHeader) {
+            const match = fromHeader.value.match(/<(.+?)>/);
+            if (match) {
+              from = match[1];
+            }
           }
-        }
 
-        const body = getPlainTextBody(msg.data.payload);
-        const formattedText = formatEmail(body);
+          const body = getPlainTextBody(msg.payload);
+          const formattedText = formatEmail(body);
 
-        return { id: message.id, subject, from, body: { text: formattedText, html: '' } };
+          return { id: msg.id, subject, from, body: { text: formattedText, html: '' } };
+        });
+
+        return {
+          threadId: message.threadId,
+          messages: formattedMessages,
+        };
       })
     );
 
-    return NextResponse.json({ emailDetails }, { status: 200 });
+    return NextResponse.json({ emailThreads }, { status: 200 });
   } catch (error) {
-    console.error('Error fetching emails', error);
-    return NextResponse.json({ error: 'Failed to fetch emails' }, { status: 500 });
+    console.error('Error fetching threaded conversations', error);
+    return NextResponse.json({ error: 'Failed to fetch threaded conversations' }, { status: 500 });
   }
 }
